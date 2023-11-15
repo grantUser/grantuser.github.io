@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Vibur&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <title>grantUser</title>
+</head>
+<body>
+    <div class="stats-container">
+        <div class="stat-item">
+            📦 Repositories: <span id="repo-count">Loading...</span>
+        </div>
+        <div class="stat-item">
+            🔄 Latest Repository: <span id="latest-repo"><a href="#" id="latest-repo-link">Loading...</a></span>
+        </div>
+    </div>
+    <div class="logo"><b>g<span>r</span>an<span>t</span>U<span>s</span>er</b></div>
+
+    <script>
+        const githubUsername = 'grantUser';
+
+        const fetchData = async () => {
+            try {
+                const userResponse = await fetch(`https://api.github.com/users/${githubUsername}`);
+                if (!userResponse.ok) {
+                    throw new Error('Failed to fetch user data from GitHub API');
+                }
+                const userData = await userResponse.json();
+
+                document.getElementById('repo-count').textContent = userData.public_repos;
+
+                const reposResponse = await fetch(`https://api.github.com/users/${githubUsername}/repos`);
+                if (!reposResponse.ok) {
+                    throw new Error('Failed to fetch repositories data from GitHub API');
+                }
+                const reposData = await reposResponse.json();
+
+                const sortedRepos = reposData.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+                const latestRepo = sortedRepos.length > 0 ? sortedRepos[0].name : 'No repositories';
+                const latestRepoLink = document.getElementById('latest-repo-link');
+                
+                latestRepoLink.textContent = latestRepo;
+
+                latestRepoLink.href = sortedRepos.length > 0 ? sortedRepos[0].html_url : '#';
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+
+        window.addEventListener('load', fetchData);
+    </script>
+</body>
+</html>
